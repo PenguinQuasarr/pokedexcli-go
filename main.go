@@ -1,26 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
-	"strings"
+	"fmt"
 	"os"
+	"strings"
 )
-
-func repl() {
-
-	input := bufio.NewScanner(os.Stdin)
-
-	for {
-		fmt.Print("pokedex > ")
-		input.Scan()
-		command := cleanInput(input.Text())
-		fmt.Printf("Your command was: %s\n", command[0])
-	}
-	if err := input.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
-	}
-}
 
 func cleanInput(text string) []string {
 	trimedAndLower := strings.ToLower(strings.TrimSpace(text))
@@ -28,8 +13,28 @@ func cleanInput(text string) []string {
 	return words
 }
 
+
+func repl() {
+
+	input := bufio.NewScanner(os.Stdin)
+	commands := GetCommands()
+	config := Config{}
+	config.next = "https://pokeapi.co/api/v2/location-area/"
+
+	for {
+		fmt.Print("pokedex > ")
+		input.Scan()
+		command := cleanInput(input.Text())
+
+		cmd, ok := commands[command[0]]
+		if !ok {
+			fmt.Println("Unknown command")
+		} else {
+			cmd.callback(commands, &config)
+		}
+	}
+}
+
 func main() {
-
 	repl()
-
 }
